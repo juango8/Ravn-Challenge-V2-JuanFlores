@@ -26,7 +26,7 @@ class AllPeopleListActivity : AppCompatActivity() {
     }
 
     private var mApolloClient = apolloClient
-    private lateinit var mPeopleListAdapter: AllPeopleListAdapter
+    private lateinit var mAllPeopleListAdapter: AllPeopleListAdapter
 
     private var mPeopleList = mutableListOf<AllPeoplePaginatedQuery.Person>()
     private var mCurrEndCursor: String? = null
@@ -37,28 +37,31 @@ class AllPeopleListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_all_people_list)
 
-        mPeopleListAdapter = AllPeopleListAdapter(this, mPeopleList)
-        mPeopleListAdapter.onItemClickListener { person ->
+        mAllPeopleListAdapter = AllPeopleListAdapter(this, mPeopleList)
+        mAllPeopleListAdapter.onItemClickListener { person ->
+            Log.i(TAG, "click on item of ${person.name}")
             getDetailOf(person.id)
-            Log.i(TAG, "click on item")
         }
 
-        rv_all_people.adapter = mPeopleListAdapter
+        rv_all_people.adapter = mAllPeopleListAdapter
         rv_all_people.layoutManager = LinearLayoutManager(this)
 
 
+        /**
+         * Courutine Scope to work in another thread
+         */
         lifecycleScope.launch {
             while (true) {
                 val result = try {
                     getDataServer()
                 } catch (e: Exception) {
-                    Log.d(TAG, "error $e")
+                    Log.e(TAG, e.toString())
                     break
                 }
 
                 when (result) {
                     LoadResult.Empty -> {
-                        ll_loading.visibility = View.GONE
+                        hideLoad()
                         break
                     }
                     LoadResult.Successful -> {
@@ -70,6 +73,12 @@ class AllPeopleListActivity : AppCompatActivity() {
         }
     }
 
+    /**
+     * Get list of character of the server SWAPI from server, check if response has any errors
+     * or is empty, else get another five characters and save CurrEndCursor to the next query
+     * @return LoadResult.Empty if it is not more data of characters
+     * @return LoadResult.Successful if is more data of characters
+     */
     private suspend fun getDataServer(): LoadResult = coroutineScope {
         val response = try {
             mApolloClient
@@ -87,7 +96,7 @@ class AllPeopleListActivity : AppCompatActivity() {
         }
 
         if (allPeople.people?.isEmpty() != false) {
-            runOnUiThread { ll_loading.visibility = View.GONE }
+            runOnUiThread { hideLoad() }
             return@coroutineScope LoadResult.Empty
         }
 
@@ -95,7 +104,7 @@ class AllPeopleListActivity : AppCompatActivity() {
         mPeopleList.addAll(allPeople.people.filterNotNull())
 
         runOnUiThread {
-            mPeopleListAdapter.notifyItemRangeInserted(lastIndex, 5)
+            mAllPeopleListAdapter.notifyItemRangeInserted(lastIndex, 5)
         }
         if (allPeople.pageInfo.endCursor == null)
             throw Exception("Get a null cursor")
@@ -104,10 +113,20 @@ class AllPeopleListActivity : AppCompatActivity() {
         return@coroutineScope LoadResult.Successful
     }
 
+    /**
+     * show a failed message in the view
+     */
     private fun showLoadError() {
         ll_loading.visibility = View.GONE
         rv_all_people.visibility = View.GONE
         ll_failed.visibility = View.VISIBLE
+    }
+
+    /**
+     * hide the loading message in the view
+     */
+    private fun hideLoad(){
+        ll_loading.visibility = View.GONE
     }
 
     private enum class LoadResult {
@@ -115,6 +134,9 @@ class AllPeopleListActivity : AppCompatActivity() {
         Successful
     }
 
+    /**
+     * add a extra to the intent that is the id of the character clicked
+     */
     private fun getDetailOf(id: String) {
         val intent = Intent(this,  DetailCharacter::class.java)
         intent.putExtra("id", id)

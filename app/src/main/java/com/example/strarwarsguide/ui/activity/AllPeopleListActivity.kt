@@ -1,5 +1,6 @@
 package com.example.strarwarsguide.ui.activity
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -37,7 +38,8 @@ class AllPeopleListActivity : AppCompatActivity() {
         setContentView(R.layout.activity_all_people_list)
 
         mPeopleListAdapter = AllPeopleListAdapter(this, mPeopleList)
-        mPeopleListAdapter.onItemClickListener {
+        mPeopleListAdapter.onItemClickListener { person ->
+            getDetailOf(person.id)
             Log.i(TAG, "click on item")
         }
 
@@ -62,7 +64,6 @@ class AllPeopleListActivity : AppCompatActivity() {
                     LoadResult.Successful -> {
                         rv_all_people.visibility = View.VISIBLE
                         runOnUiThread { ll_loading.visibility = View.VISIBLE }
-//                        delay(5.seconds)
                     }
                 }
             }
@@ -112,5 +113,11 @@ class AllPeopleListActivity : AppCompatActivity() {
     private enum class LoadResult {
         Empty,
         Successful
+    }
+
+    private fun getDetailOf(id: String) {
+        val intent = Intent(this,  DetailCharacter::class.java)
+        intent.putExtra("id", id)
+        startActivity(intent)
     }
 }

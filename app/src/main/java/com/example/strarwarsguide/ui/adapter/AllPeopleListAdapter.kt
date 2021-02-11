@@ -27,7 +27,6 @@ class AllPeopleListAdapter(
         }
     }
 
-    private val mContext = context
     private val mPeopleList = peopleList
     private val mInflater = LayoutInflater.from(context)
 
@@ -43,8 +42,8 @@ class AllPeopleListAdapter(
         val person = mPeopleList[position]
         holder.personName.text = person.name
 
-        val species = person.species?.name ?: "Human"
-        val homeWorld = person.homeworld?.name ?: "Earth"
+        val species = person.species?.name ?: "unknown"
+        val homeWorld = person.homeworld?.name ?: "far, far away"
         holder.personFooter.text = "$species from $homeWorld"
     }
 

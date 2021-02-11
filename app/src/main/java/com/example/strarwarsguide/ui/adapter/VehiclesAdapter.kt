@@ -14,6 +14,7 @@ class VehiclesAdapter(context: Context, vehicleList: MutableList<PersonInformati
     class VehicleViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val dataL: TextView = itemView.findViewById(R.id.dataL)
         init {
+            // the vehicles do not need a right space
             itemView.findViewById<TextView>(R.id.dataR).visibility = View.GONE
         }
     }

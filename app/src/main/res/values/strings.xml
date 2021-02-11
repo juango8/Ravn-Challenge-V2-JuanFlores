@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">Strar Wars Guide</string>
+    <string name="label_all_people">People of Strar Wars</string>
+    <string name="message_conection">Loading</string>
+    <string name="message_connection_fail">Failed to Load Data</string>
+    <string name="more_information">More information</string>
 </resources>

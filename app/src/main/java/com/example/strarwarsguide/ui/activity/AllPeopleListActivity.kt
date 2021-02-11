@@ -138,7 +138,7 @@ class AllPeopleListActivity : AppCompatActivity() {
      * add a extra to the intent that is the id of the character clicked
      */
     private fun getDetailOf(id: String) {
-        val intent = Intent(this,  DetailCharacter::class.java)
+        val intent = Intent(this,  DetailCharacterActivity::class.java)
         intent.putExtra("id", id)
         startActivity(intent)
     }

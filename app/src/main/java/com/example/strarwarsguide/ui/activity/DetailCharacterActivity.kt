@@ -3,13 +3,11 @@ package com.example.strarwarsguide.ui.activity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
 import com.apollographql.apollo.ApolloClient
 import com.apollographql.apollo.coroutines.await
 import com.apollographql.apollo.exception.ApolloException
@@ -22,16 +20,14 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import java.util.*
 
-class DetailCharacter : AppCompatActivity() {
+class DetailCharacterActivity : AppCompatActivity() {
 
     companion object {
-        private const val TAG = "DetailCharacter"
+        private const val TAG = "DetailCharacterActivity"
     }
 
     private lateinit var actionBar: ActionBar
 
-    private lateinit var mKeyValueLayout: LinearLayout
-    private lateinit var mVehiclesRecyclerView: RecyclerView
     private lateinit var mVehiclesListAdapter: VehiclesAdapter
     private lateinit var mApolloClient: ApolloClient
 
@@ -43,12 +39,11 @@ class DetailCharacter : AppCompatActivity() {
 
         mApolloClient = apolloClient
         actionBar = supportActionBar!!
-        mKeyValueLayout = findViewById(R.id.ll_information)
-        mVehiclesRecyclerView = findViewById(R.id.rv_vehicles)
         mVehiclesListAdapter = VehiclesAdapter(this, mVehiclesList)
-        mVehiclesRecyclerView.adapter = mVehiclesListAdapter
-        mVehiclesRecyclerView.layoutManager = LinearLayoutManager(this)
+        rv_vehicles.adapter = mVehiclesListAdapter
+        rv_vehicles.layoutManager = LinearLayoutManager(this)
 
+        // to active the back button
         actionBar.setDisplayHomeAsUpEnabled(true)
 
         val id = intent.getStringExtra("id")
@@ -57,19 +52,21 @@ class DetailCharacter : AppCompatActivity() {
                 getInformation(id)
             }
         } else {
-            ll_loading.visibility = View.GONE
-            ll_failed.visibility = View.VISIBLE
+            showLoadError()
         }
 
     }
 
+    /**
+     * Get information from a specific character using @param id, and add the information to the
+     * view
+     */
     private suspend fun getInformation(id: String): Unit = coroutineScope {
         val response = try {
             mApolloClient.query(PersonInformationQuery(id = id)).await()
         } catch (e: ApolloException) {
             runOnUiThread {
-                ll_loading.visibility = View.GONE
-                ll_failed.visibility = View.VISIBLE
+                showLoadError()
             }
             return@coroutineScope
         }
@@ -77,8 +74,7 @@ class DetailCharacter : AppCompatActivity() {
         val person = response.data?.person
         if (person == null || response.hasErrors()) {
             runOnUiThread {
-                ll_loading.visibility = View.GONE
-                ll_failed.visibility = View.VISIBLE
+                showLoadError()
             }
             return@coroutineScope
         }
@@ -89,7 +85,6 @@ class DetailCharacter : AppCompatActivity() {
             .addAll(person.vehicleConnection?.vehicles?.filterNotNull() ?: emptyList())
 
         runOnUiThread {
-            // Add data to "General Information" layout
             ll_detail.visibility = View.VISIBLE
             actionBar.title = person.name ?: "Unknown"
             addItemDataView(getString(R.string.eye_color), person.eyeColor ?: "Unknown")
@@ -102,11 +97,22 @@ class DetailCharacter : AppCompatActivity() {
         }
     }
 
-    private fun addItemDataView(key: String, value: String) {
-        val view = layoutInflater.inflate(R.layout.item_information, mKeyValueLayout, false)
-        view.findViewById<TextView>(R.id.dataL).text = key
-        view.findViewById<TextView>(R.id.dataR).text = value
-        mKeyValueLayout.addView(view)
+    /**
+     * show a failed message in the view
+     */
+    private fun showLoadError() {
+        ll_loading.visibility = View.GONE
+        ll_failed.visibility = View.VISIBLE
+    }
+
+    /**
+     * add a row to the linear layout of general information
+     */
+    private fun addItemDataView(left: String, right: String) {
+        val view = layoutInflater.inflate(R.layout.item_information, ll_information, false)
+        view.findViewById<TextView>(R.id.dataL).text = left
+        view.findViewById<TextView>(R.id.dataR).text = right
+        ll_information.addView(view)
     }
 
     override fun onSupportNavigateUp(): Boolean {

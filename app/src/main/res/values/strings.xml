@@ -4,4 +4,10 @@
     <string name="message_conection">Loading</string>
     <string name="message_connection_fail">Failed to Load Data</string>
     <string name="more_information">More information</string>
+    <string name="general_information">General Information</string>
+    <string name="vehicles">Vehicles</string>
+    <string name="eye_color">Eye Color</string>
+    <string name="hair_color">Hair Color</string>
+    <string name="skin_color">Skin Color</string>
+    <string name="birth_year">Birth Year</string>
 </resources>
